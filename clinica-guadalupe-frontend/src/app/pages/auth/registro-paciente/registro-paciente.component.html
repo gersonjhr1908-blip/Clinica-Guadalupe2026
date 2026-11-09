@@ -1,0 +1,46 @@
+<section class="page">
+  <div class="card wide">
+    <img src="logo_guadalupe.png" alt="Clínica Guadalupe" class="auth-logo" />
+    <p class="eyebrow">PACIENTES</p>
+    <h1>Crea tu cuenta</h1>
+    <form class="grid" (ngSubmit)="submit()">
+      <label>Nombres<input name="nombres" [(ngModel)]="form.nombres" required /></label
+      ><label>Apellidos<input name="apellidos" [(ngModel)]="form.apellidos" required /></label
+      ><label>DNI<input name="dni" maxlength="8" [(ngModel)]="form.dni" required /></label
+      ><label
+        >Teléfono<input name="telefono" maxlength="9" [(ngModel)]="form.telefono" required /></label
+      ><label class="span"
+        >Correo electrónico<input
+          type="email"
+          name="email"
+          [(ngModel)]="form.email"
+          required /></label
+      ><label class="span"
+        >Contraseña<span class="password-wrap"
+          ><input
+            [type]="passwordVisible ? 'text' : 'password'"
+            name="password"
+            minlength="8"
+            [(ngModel)]="form.password"
+            required
+          /><button
+            type="button"
+            class="eye-button"
+            (click)="passwordVisible = !passwordVisible"
+            [attr.aria-label]="passwordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            {{ passwordVisible ? '◉' : '◌' }}
+          </button></span
+        ><small>Mínimo 8 caracteres</small></label
+      >
+      <p class="error span" *ngIf="error">{{ error }}</p>
+      <button class="button span" [disabled]="loading">
+        {{ loading ? 'Creando…' : 'Crear cuenta' }}
+      </button>
+    </form>
+    <p class="switch">
+      ¿Ya tienes cuenta?
+      <button type="button" (click)="loginRequested.emit()">Inicia sesión</button>
+    </p>
+  </div>
+</section>

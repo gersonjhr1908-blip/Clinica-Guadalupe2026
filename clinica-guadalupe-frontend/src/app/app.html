@@ -1,0 +1,7 @@
+<header class="topbar"><a class="brand" (click)="go('inicio')"><img src="logo_guadalupe.png" alt="Clínica Guadalupe" class="brand-logo"></a><nav><button class="link" (click)="go('inicio')">Inicio</button>@if(token){<button class="link" (click)="go('dashboard')">Panel</button><button class="link" (click)="go('perfil')">Mi perfil</button><button class="button ghost" (click)="logout()">Cerrar sesión</button>}@else{<button class="link" (click)="go('login')">Ingresar</button><button class="button primary small" (click)="go('registro')">Registrarme</button>}</nav></header>
+@if(message){<div class="notice">{{ message }}</div>}
+@if(view==='inicio'){<app-inicio (openLogin)="go('login')" (openRegister)="go('registro')"/>}
+@if(view==='login'){<app-login (loggedIn)="onLogin()" (registerRequested)="go('registro')"/>}
+@if(view==='registro'){<app-registro-paciente (registered)="onRegister($event)" (loginRequested)="go('login')"/>}
+@if(view==='dashboard'&&token){@if(userRole==='ADMINISTRADOR'){<app-administrador (openProfile)="go('perfil')" (logout)="logout()"/>} @else if(userRole==='MEDICO'){<app-doctor-portal (openProfile)="go('perfil')" (logout)="logout()"/>} @else {<app-portal-role (openProfile)="go('perfil')" (logout)="logout()"/>}}
+@if(view==='perfil'&&token){<app-perfil (sessionExpired)="sessionExpired()" (backToDashboard)="go('dashboard')"/>}

@@ -1,0 +1,35 @@
+<section class="page">
+  <div class="card">
+    <img src="logo_guadalupe.png" alt="Clínica Guadalupe" class="auth-logo" />
+    <p class="eyebrow">BIENVENIDO</p>
+    <h1>Inicia sesión</h1>
+    <form (ngSubmit)="submit()">
+      <label
+        >Correo electrónico<input
+          type="email"
+          name="email"
+          [(ngModel)]="form.email"
+          required /></label
+      ><label
+        >Contraseña<span class="password-wrap"
+          ><input
+            [type]="passwordVisible ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="form.password"
+            required
+          /><button type="button" class="eye-button" (click)="passwordVisible = !passwordVisible">
+            {{ passwordVisible ? '◉' : '◌' }}
+          </button></span
+        ></label
+      >
+      <p class="error" *ngIf="error">{{ error }}</p>
+      <button class="button" [disabled]="loading">
+        {{ loading ? 'Ingresando…' : 'Ingresar' }}
+      </button>
+    </form>
+    <p class="switch">
+      ¿Aún no tienes cuenta?
+      <button type="button" (click)="registerRequested.emit()">Regístrate</button>
+    </p>
+  </div>
+</section>

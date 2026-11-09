@@ -1,0 +1,183 @@
+<section class="page">
+  <div class="profile-card">
+    <div class="profile-cover"></div>
+    <div class="profile-content">
+      <div class="heading">
+        <div class="avatar">{{ name.charAt(0) }}</div>
+        <div>
+          <p class="eyebrow">
+            {{
+              isAdmin
+                ? 'ÁREA DEL ADMINISTRADOR'
+                : isRecepcionista
+                  ? 'ÁREA DE RECEPCIÓN'
+                : isMedico
+                  ? 'ÁREA DEL MÉDICO'
+                  : 'ÁREA DEL PACIENTE'
+            }}
+          </p>
+          <br>
+          <h1>Hola, {{ name }}</h1>
+          <p class="muted">
+            {{
+              isAdmin
+                ? 'Administra tus datos personales y de acceso.'
+                : isRecepcionista
+                  ? 'Actualiza tus datos personales de recepción.'
+                : isMedico
+                  ? 'Consulta y actualiza tus datos profesionales.'
+                  : 'Completa tus datos clínicos para una mejor atención.'
+            }}
+          </p>
+        </div>
+      </div>
+      @if (profile) {
+        @if (isAdmin || isRecepcionista) {
+          <form (ngSubmit)="save()">
+            <div class="form-section">
+              <div class="section-heading">
+                <span>01</span>
+                <div>
+                  <h2>{{ isRecepcionista ? 'Datos de recepción' : 'Datos del administrador' }}</h2>
+                  <p>Información personal de tu cuenta.</p>
+                </div>
+              </div>
+              <div class="grid">
+                <label>Nombres<input name="nombres" [(ngModel)]="adminForm.nombres" /></label
+                ><label>Apellidos<input name="apellidos" [(ngModel)]="adminForm.apellidos" /></label
+                ><label>DNI<input name="dni" maxlength="8" [(ngModel)]="adminForm.dni" /></label
+                ><label
+                  >Teléfono<input
+                    name="telefono"
+                    maxlength="9"
+                    [(ngModel)]="adminForm.telefono" /></label
+                ><label class="span"
+                  >Correo electrónico<input type="email" name="email" [(ngModel)]="adminForm.email"
+                /></label>
+              </div>
+            </div>
+            <p class="error span" *ngIf="error">{{ error }}</p>
+            <button class="button save-button">Guardar cambios <span>→</span></button>
+          </form>
+        } @else if (isMedico) {
+          <form (ngSubmit)="save()">
+            <div class="form-section">
+              <div class="section-heading">
+                <span>01</span>
+                <div>
+                  <h2>Datos profesionales</h2>
+                  <p>Información registrada del médico.</p>
+                </div>
+              </div>
+              <div class="grid">
+                <label>Nombres<input name="medNombres" [(ngModel)]="medicoForm.nombres" /></label
+                ><label
+                  >Apellidos<input name="medApellidos" [(ngModel)]="medicoForm.apellidos" /></label
+                ><label>DNI<input name="medDni" [(ngModel)]="medicoForm.dni" /></label
+                ><label
+                  >Teléfono<input name="medTelefono" [(ngModel)]="medicoForm.telefono" /></label
+                ><label class="span"
+                  >Correo electrónico<input
+                    type="email"
+                    name="medEmail"
+                    [(ngModel)]="medicoForm.email" /></label
+                ><label
+                  >Especialidad<input
+                    name="especialidad"
+                    [value]="medicoForm.especialidad"
+                    readonly /></label
+                ><label>CMP<input name="cmp" [(ngModel)]="medicoForm.cmp" /></label
+                ><label
+                  >Precio de consulta<input
+                    type="number"
+                    name="precio"
+                    [(ngModel)]="medicoForm.precioConsulta" /></label
+                ><label
+                  >Duración (minutos)<input
+                    type="number"
+                    name="duracion"
+                    [(ngModel)]="medicoForm.duracionConsultaMinutos"
+                /></label
+                ><label class="span">Biografía<textarea name="biografia" rows="3" [(ngModel)]="medicoForm.biografia"></textarea></label>
+              </div>
+            </div>
+            <p class="error span" *ngIf="error">{{ error }}</p>
+            <button class="button save-button">Guardar cambios <span>→</span></button>
+          </form>
+        } @else {
+          <form (ngSubmit)="save()">
+            <div class="form-section">
+              <div class="section-heading">
+                <span>01</span>
+                <div>
+                  <h2>Información personal</h2>
+                  <p>Datos básicos para identificarte correctamente.</p>
+                </div>
+              </div>
+              <div class="grid">
+                <label
+                  >Fecha de nacimiento<input
+                    type="date"
+                    name="fecha"
+                    [(ngModel)]="form.fechaNacimiento" /></label
+                ><label
+                  >Sexo<select name="sexo" [(ngModel)]="form.sexo">
+                    <option value="">Seleccionar</option>
+                    <option value="MASCULINO">Masculino</option>
+                    <option value="FEMENINO">Femenino</option>
+                    <option value="OTRO">Otro</option>
+                  </select></label
+                ><label class="span"
+                  >Dirección<input
+                    name="direccion"
+                    [(ngModel)]="form.direccion"
+                    placeholder="Ingresa tu dirección"
+                /></label>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="section-heading">
+                <span>02</span>
+                <div>
+                  <h2>Información clínica</h2>
+                  <p>Esta información ayuda al personal médico.</p>
+                </div>
+              </div>
+              <div class="grid">
+                <label
+                  >Tipo de sangre<input
+                    name="sangre"
+                    placeholder="Ej. O+"
+                    [(ngModel)]="form.tipoSangre" /></label
+                ><label
+                  >Teléfono de emergencia<input
+                    name="emergencia"
+                    [(ngModel)]="form.telefonoEmergencia"
+                    placeholder="9 dígitos" /></label
+                ><label class="span"
+                  >Alergias<textarea
+                    name="alergias"
+                    rows="3"
+                    [(ngModel)]="form.alergias"
+                    placeholder="Escribe alergias o coloca ‘Ninguna’"
+                  ></textarea></label
+                ><label class="span"
+                  >Contacto de emergencia<input
+                    name="contacto"
+                    [(ngModel)]="form.contactoEmergencia"
+                    placeholder="Nombre y teléfono"
+                /></label>
+              </div>
+            </div>
+            <p class="error span" *ngIf="error">{{ error }}</p>
+            <button class="button save-button">Guardar cambios <span>→</span></button>
+          </form>
+        }
+      } @else if (!error) {
+        <p class="muted loading">Cargando perfil…</p>
+      } @else {
+        <p class="error">{{ error }}</p>
+      }
+    </div>
+  </div>
+</section>
