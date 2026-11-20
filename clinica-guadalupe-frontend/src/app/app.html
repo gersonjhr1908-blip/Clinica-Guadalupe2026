@@ -5,3 +5,4 @@
 @if(view==='registro'){<app-registro-paciente (registered)="onRegister($event)" (loginRequested)="go('login')"/>}
 @if(view==='dashboard'&&token){@if(userRole==='ADMINISTRADOR'){<app-administrador (openProfile)="go('perfil')" (logout)="logout()"/>} @else if(userRole==='MEDICO'){<app-doctor-portal (openProfile)="go('perfil')" (logout)="logout()"/>} @else {<app-portal-role (openProfile)="go('perfil')" (logout)="logout()"/>}}
 @if(view==='perfil'&&token){<app-perfil (sessionExpired)="sessionExpired()" (backToDashboard)="go('dashboard')"/>}
+<app-accessibility />

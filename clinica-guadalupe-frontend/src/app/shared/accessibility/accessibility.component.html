@@ -1,0 +1,14 @@
+<section class="accessibility" [class.open]="isOpen" aria-label="Opciones de accesibilidad">
+  @if (isOpen) {
+    <div class="accessibility-panel" role="dialog" aria-modal="false" aria-label="Panel de accesibilidad">
+      <div class="panel-title"><span aria-hidden="true">◐</span><b>Accesibilidad</b><button class="close" (click)="togglePanel()" aria-label="Cerrar accesibilidad">×</button></div>
+      <div class="font-size"><span>Tamaño de texto ({{ fontScale }}%)</span><div><button (click)="changeFont(-15)" [disabled]="fontScale <= 90" aria-label="Reducir texto">A−</button><button (click)="changeFont(15)" [disabled]="fontScale >= 130" aria-label="Aumentar texto">A+</button></div></div>
+      <button class="accessibility-action" [class.selected]="activeMode === 'contrast'" (click)="setMode('contrast')"><span>◐</span> Alto contraste</button>
+      <button class="accessibility-action" [class.selected]="activeMode === 'invert'" (click)="setMode('invert')"><span>◑</span> Invertir colores</button>
+      <button class="accessibility-action" [class.selected]="activeMode === 'colorblind'" (click)="setMode('colorblind')"><span>◉</span> Filtro daltonismo</button>
+      <button class="accessibility-action" [class.selected]="isReading" (click)="readPage()"><span>🔊</span> {{ isReading ? 'Detener lectura' : 'Leer texto en voz alta' }}</button>
+      <button class="accessibility-action reset" (click)="reset()"><span>↻</span> Restablecer valores</button>
+    </div>
+  }
+  <button class="accessibility-fab" (click)="togglePanel()" [attr.aria-expanded]="isOpen" aria-label="Abrir opciones de accesibilidad">♿</button>
+</section>

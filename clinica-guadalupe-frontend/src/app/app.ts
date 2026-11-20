@@ -7,9 +7,10 @@ import { AdministradorComponent } from './pages/administrador/administrador.comp
 import { AuthService } from './core/services/auth.service';
 import { PortalRoleComponent } from './pages/portal/portal-role.component';
 import { DoctorPortalComponent } from './pages/portal/doctor-portal.component';
+import { AccessibilityComponent } from './shared/accessibility/accessibility.component';
 
 type View = 'inicio' | 'login' | 'registro' | 'dashboard' | 'perfil';
-@Component({ selector: 'app-root', standalone: true, imports: [InicioComponent, LoginComponent, RegistroPacienteComponent, PerfilComponent, AdministradorComponent, PortalRoleComponent, DoctorPortalComponent], templateUrl: './app.html', styleUrls: ['./app.css', './app-extra.css'] })
+@Component({ selector: 'app-root', standalone: true, imports: [InicioComponent, LoginComponent, RegistroPacienteComponent, PerfilComponent, AdministradorComponent, PortalRoleComponent, DoctorPortalComponent, AccessibilityComponent], templateUrl: './app.html', styleUrls: ['./app.css', './app-extra.css'] })
 export class App {
   view: View = 'inicio'; message = '';
   constructor(private readonly auth: AuthService) {}
