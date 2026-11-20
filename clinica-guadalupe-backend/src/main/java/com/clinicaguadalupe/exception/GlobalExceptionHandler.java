@@ -38,6 +38,19 @@ public class GlobalExceptionHandler {
                 .body(respuesta);
     }
 
+    @ExceptionHandler(OperacionNoPermitidaException.class)
+    public ResponseEntity<Map<String, Object>> manejarOperacionNoPermitida(
+            OperacionNoPermitidaException exception
+    ) {
+        Map<String, Object> respuesta = new LinkedHashMap<>();
+        respuesta.put("fecha", LocalDateTime.now());
+        respuesta.put("estado", 409);
+        respuesta.put("error", "Operación no permitida");
+        respuesta.put("mensaje", exception.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> manejarValidaciones(
             MethodArgumentNotValidException exception

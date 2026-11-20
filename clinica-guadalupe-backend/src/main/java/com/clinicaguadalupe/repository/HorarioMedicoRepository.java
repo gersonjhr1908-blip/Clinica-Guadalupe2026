@@ -60,4 +60,6 @@ public interface HorarioMedicoRepository
             Long medicoId,
             DiaSemana diaSemana
     );
+
+    List<HorarioMedico> findByMedicoId(Long medicoId);
 }

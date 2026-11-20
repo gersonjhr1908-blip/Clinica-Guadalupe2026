@@ -12,6 +12,12 @@ import com.clinicaguadalupe.dto.UsuarioActualizarRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.clinicaguadalupe.dto.CambiarPasswordRequest;
+import com.clinicaguadalupe.entity.Rol;
+import com.clinicaguadalupe.exception.OperacionNoPermitidaException;
+import com.clinicaguadalupe.repository.CitaRepository;
+import com.clinicaguadalupe.repository.HorarioMedicoRepository;
+import com.clinicaguadalupe.repository.MedicoRepository;
+import com.clinicaguadalupe.repository.PacienteRepository;
 
 import java.util.List;
 
@@ -20,13 +26,25 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PacienteRepository pacienteRepository;
+    private final MedicoRepository medicoRepository;
+    private final HorarioMedicoRepository horarioMedicoRepository;
+    private final CitaRepository citaRepository;
 
     public UsuarioServiceImpl(
             UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            PacienteRepository pacienteRepository,
+            MedicoRepository medicoRepository,
+            HorarioMedicoRepository horarioMedicoRepository,
+            CitaRepository citaRepository
     ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.pacienteRepository = pacienteRepository;
+        this.medicoRepository = medicoRepository;
+        this.horarioMedicoRepository = horarioMedicoRepository;
+        this.citaRepository = citaRepository;
     }
 
     @Override
@@ -125,6 +143,31 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public void eliminar(Long id) {
         Usuario usuario = buscarEntidad(id);
+
+        if (usuario.getRol() == Rol.ADMINISTRADOR) {
+            throw new OperacionNoPermitidaException(
+                    "No se puede eliminar una cuenta administradora"
+            );
+        }
+
+        if (citaRepository.existsByPacienteUsuarioId(id)
+                || citaRepository.existsByMedicoUsuarioId(id)) {
+            throw new OperacionNoPermitidaException(
+                    "No se puede eliminar una cuenta con citas registradas. "
+                            + "Desactívala para conservar el historial clínico."
+            );
+        }
+
+        pacienteRepository.findByUsuarioId(id)
+                .ifPresent(pacienteRepository::delete);
+
+        medicoRepository.findByUsuarioId(id).ifPresent(medico -> {
+            horarioMedicoRepository.deleteAll(
+                    horarioMedicoRepository.findByMedicoId(medico.getId())
+            );
+            medicoRepository.delete(medico);
+        });
+
         usuarioRepository.delete(usuario);
     }
 

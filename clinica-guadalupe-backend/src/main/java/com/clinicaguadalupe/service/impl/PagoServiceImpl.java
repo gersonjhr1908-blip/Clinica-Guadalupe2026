@@ -35,6 +35,7 @@ public class PagoServiceImpl implements PagoService {
             String emailPaciente,
             PagoRequest request
     ) {
+        validarMetodoPago(request);
         Cita cita = citaRepository
                 .findByIdAndPacienteUsuarioEmail(
                         request.citaId(),
@@ -182,5 +183,10 @@ public class PagoServiceImpl implements PagoService {
                 pago.getFechaPago(),
                 pago.getFechaCreacion()
         );
+    }
+    private void validarMetodoPago(PagoRequest request) {
+        if (request.metodoPago() == null) {
+            throw new IllegalArgumentException("El método de pago es obligatorio");
+        }
     }
 }

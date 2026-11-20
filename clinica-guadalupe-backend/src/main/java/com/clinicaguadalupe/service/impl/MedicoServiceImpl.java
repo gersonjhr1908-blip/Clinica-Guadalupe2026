@@ -208,8 +208,7 @@ public class MedicoServiceImpl implements MedicoService {
     @Transactional
     public void eliminar(Long id) {
         Medico medico = obtenerMedico(id);
-        medicoRepository.delete(medico);
-        usuarioRepository.delete(medico.getUsuario());
+        usuarioService.eliminar(medico.getUsuario().getId());
     }
 
     private Medico obtenerMedico(Long id) {
