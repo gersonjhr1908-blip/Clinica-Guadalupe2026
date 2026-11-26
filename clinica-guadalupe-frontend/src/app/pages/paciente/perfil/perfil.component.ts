@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 
 interface Profile { id?: number; nombres: string; apellidos: string; dni?: string; email?: string; telefono?: string; fechaNacimiento?: string; sexo?: string; direccion?: string; tipoSangre?: string; alergias?: string; contactoEmergencia?: string; telefonoEmergencia?: string; rol?: string; }
 @Component({ selector: 'app-perfil', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './perfil.component.html', styleUrl: './perfil.component.css' })
-export class PerfilComponent {
+export class PerfilComponent implements OnInit {
   @Output() sessionExpired = new EventEmitter<void>();
   @Output() backToDashboard = new EventEmitter<void>();
   private readonly http = inject(HttpClient); private readonly auth = inject(AuthService); profile: Profile | null = null; error = ''; message = '';

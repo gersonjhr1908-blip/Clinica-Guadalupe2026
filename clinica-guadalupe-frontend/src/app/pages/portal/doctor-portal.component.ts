@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -9,7 +9,7 @@ import { Pagination, PaginationComponent } from '../pagination';
 import { DownwardSelectComponent } from '../downward-select';
 
 @Component({selector:'app-doctor-portal',standalone:true,imports:[CommonModule,FormsModule,PaginationComponent,DownwardSelectComponent,CitasMedicoComponent],templateUrl:'./doctor-portal.component.html',styleUrls:['./doctor-portal.component.css']})
-export class DoctorPortalComponent {
+export class DoctorPortalComponent implements OnInit {
   @Output() openProfile=new EventEmitter<void>(); @Output() logout=new EventEmitter<void>();
   private readonly http=inject(HttpClient); name=localStorage.getItem('cg_name')??'Médico'; section='inicio'; medicoId:number|null=null; consultorios:any[]=[]; horarios:any[]=[];
   horario={diaSemana:'LUNES',horaInicio:'08:00',horaFin:'17:00',consultorioId:null as number|null}; dias=['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'];

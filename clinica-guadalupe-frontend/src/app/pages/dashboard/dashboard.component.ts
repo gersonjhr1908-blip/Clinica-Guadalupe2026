@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, HostBinding } from '@angular/core';
+import { Component, EventEmitter, Output, inject, HostBinding, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -68,7 +68,7 @@ import { CitasRecepcionComponent } from '../citas-recepcion.component';
     './dashboard-roles.css',
   ],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   @Output() openProfile = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
   @HostBinding('class.role-recepcionista') get isReceptionistLayout(): boolean { return this.role === 'RECEPCIONISTA'; }
