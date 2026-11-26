@@ -56,10 +56,18 @@ public interface HorarioMedicoRepository
             @Param("excluirId") Long excluirId
     );
 
+    @Query("""
+            SELECT h FROM HorarioMedico h
+            WHERE h.medico.id = :medicoId AND h.diaSemana = :diaSemana
+              AND h.activo = true AND h.consultorio.activo = true
+            ORDER BY h.horaInicio ASC
+            """)
     List<HorarioMedico> findByMedicoIdAndDiaSemanaAndActivoTrueOrderByHoraInicioAsc(
-            Long medicoId,
-            DiaSemana diaSemana
+            @Param("medicoId") Long medicoId,
+            @Param("diaSemana") DiaSemana diaSemana
     );
+
+    boolean existsByConsultorioId(Long consultorioId);
 
     List<HorarioMedico> findByMedicoId(Long medicoId);
 }

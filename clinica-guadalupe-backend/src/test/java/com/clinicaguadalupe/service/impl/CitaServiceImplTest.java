@@ -5,6 +5,7 @@ import com.clinicaguadalupe.dto.CitaResponse;
 import com.clinicaguadalupe.entity.*;
 import com.clinicaguadalupe.exception.DatoDuplicadoException;
 import com.clinicaguadalupe.repository.*;
+import com.clinicaguadalupe.service.PacienteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ class CitaServiceImplTest {
     private static final Long MEDICO_ID = 10L;
 
     private final CitaRepository citas = mock(CitaRepository.class);
-    private final PacienteRepository pacientes = mock(PacienteRepository.class);
+    private final PacienteService pacientes = mock(PacienteService.class);
     private final MedicoRepository medicos = mock(MedicoRepository.class);
     private final HorarioMedicoRepository horarios = mock(HorarioMedicoRepository.class);
 
@@ -67,7 +68,7 @@ class CitaServiceImplTest {
         when(horario.getHoraFin()).thenReturn(LocalTime.of(12, 0));
         when(horario.getConsultorio()).thenReturn(consultorio);
 
-        when(pacientes.findByUsuarioEmail(EMAIL)).thenReturn(Optional.of(paciente));
+        when(pacientes.obtenerOCrearPorEmail(EMAIL)).thenReturn(paciente);
         when(medicos.findById(MEDICO_ID)).thenReturn(Optional.of(medico));
         when(horarios.findByMedicoIdAndDiaSemanaAndActivoTrueOrderByHoraInicioAsc(
                 MEDICO_ID, DiaSemana.LUNES)).thenReturn(List.of(horario));

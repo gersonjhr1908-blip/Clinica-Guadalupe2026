@@ -6,7 +6,10 @@ import com.clinicaguadalupe.dto.EstadoRequest;
 import com.clinicaguadalupe.entity.Consultorio;
 import com.clinicaguadalupe.exception.DatoDuplicadoException;
 import com.clinicaguadalupe.exception.RecursoNoEncontradoException;
+import com.clinicaguadalupe.exception.OperacionNoPermitidaException;
+import com.clinicaguadalupe.repository.CitaRepository;
 import com.clinicaguadalupe.repository.ConsultorioRepository;
+import com.clinicaguadalupe.repository.HorarioMedicoRepository;
 import com.clinicaguadalupe.service.ConsultorioService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +22,17 @@ public class ConsultorioServiceImpl
 
     private final ConsultorioRepository consultorioRepository;
 
+    private final CitaRepository citaRepository;
+    private final HorarioMedicoRepository horarioRepository;
+
     public ConsultorioServiceImpl(
-            ConsultorioRepository consultorioRepository
+            ConsultorioRepository consultorioRepository,
+            CitaRepository citaRepository,
+            HorarioMedicoRepository horarioRepository
     ) {
         this.consultorioRepository = consultorioRepository;
+        this.citaRepository = citaRepository;
+        this.horarioRepository = horarioRepository;
     }
 
     @Override
@@ -123,6 +133,19 @@ public class ConsultorioServiceImpl
         return convertirRespuesta(
                 consultorioRepository.save(consultorio)
         );
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id) {
+        Consultorio consultorio = obtenerConsultorio(id);
+        if (citaRepository.existsByConsultorioId(id) || horarioRepository.existsByConsultorioId(id)) {
+            throw new OperacionNoPermitidaException(
+                    "El consultorio tiene citas u horarios asociados. Desactívalo para dejar de ofrecerlo."
+            );
+        }
+        consultorioRepository.delete(consultorio);
+        consultorioRepository.flush();
     }
 
     private Consultorio obtenerConsultorio(Long id) {

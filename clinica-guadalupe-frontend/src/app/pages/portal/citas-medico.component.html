@@ -1,0 +1,61 @@
+<h1>{{ vista() === 'mis-citas' ? 'Mis citas' : 'Mis pacientes' }}</h1>
+<div class="toolbar">
+  @if (vista() === 'mis-citas') {
+    <app-downward-select label="Estado de la cita" [options]="filtros" [value]="filtro()"
+                         (valueChange)="filtro.set($event); paginasCitas.page = 1" />
+  }
+  <button type="button" (click)="cargar()" [disabled]="cargando() || guardando() !== null">Actualizar</button>
+</div>
+@if (cargando()) {
+  <p role="status">Cargando…</p>
+} @else if (errorCarga()) {
+  <p class="error" role="alert">{{ errorCarga() }}</p>
+} @else if (vista() === 'mis-citas') {
+  @if (citasAtencion().length) {
+    <div class="tabla">
+      <table>
+        <thead><tr><th scope="col">Cita</th><th scope="col">Paciente</th><th scope="col">Fecha y hora</th><th scope="col">Estado</th><th scope="col">Consulta</th>@if (filtro() === 'ATENDIDA') { <th scope="col">Observaciones</th> }
+          @if (filtro() === 'CONFIRMADA') { <th scope="col">Acción</th> }
+        </tr></thead>
+        <tbody>
+          @for (cita of paginasCitas.slice(citasAtencion()); track cita.id) {
+            <tr>
+              <td>{{ cita.codigo }}</td>
+              <td>{{ cita.paciente }}</td>
+              <td>{{ cita.fechaHoraInicio | date:'dd/MM/yyyy HH:mm' }}<small>{{ cita.consultorio }}</small></td>
+              <td>{{ cita.estado === 'NO_ASISTIO' ? 'No se presentó' : cita.estado }}</td>
+              <td class="detalle"><p>{{ cita.motivo }}</p></td>
+              @if (filtro() === 'ATENDIDA') { <td class="detalle"><p>{{ cita.observaciones || '—' }}</p></td> }
+              @if (filtro() === 'CONFIRMADA') {
+                <td>
+                  <button type="button" class="atender" (click)="atender(cita)"
+                          [disabled]="guardando() !== null || !puedeAtender(cita)">Atender</button>
+                  @if (!puedeAtender(cita)) { <small>Disponible desde el inicio de la cita.</small> }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [page]="paginasCitas.current(citasAtencion().length)" [pages]="paginasCitas.count(citasAtencion().length)"
+                    (pageChange)="paginasCitas.page = $event" />
+  } @else {
+    <p role="status">{{ filtro() === 'CONFIRMADA' ? 'No tienes citas por atender.' : filtro() === 'ATENDIDA' ? 'No tienes citas atendidas.' : 'No hay inasistencias registradas.' }}</p>
+  }
+} @else if (pacientes().length) {
+  <div class="tabla">
+    <table>
+      <thead><tr><th scope="col">Paciente</th><th scope="col">Citas solicitadas</th><th scope="col">Última cita programada</th></tr></thead>
+      <tbody>
+        @for (paciente of paginasPacientes.slice(pacientes()); track paciente.id) {
+          <tr><td>{{ paciente.nombre }}</td><td>{{ paciente.cantidad }}</td><td>{{ paciente.ultimaCita | date:'dd/MM/yyyy HH:mm' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <app-pagination [page]="paginasPacientes.current(pacientes().length)" [pages]="paginasPacientes.count(pacientes().length)"
+                  (pageChange)="paginasPacientes.page = $event" />
+} @else {
+  <p role="status">Aún no tienes pacientes con citas solicitadas.</p>
+}

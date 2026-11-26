@@ -4,6 +4,7 @@ import com.clinicaguadalupe.dto.UsuarioRequest;
 import com.clinicaguadalupe.dto.UsuarioResponse;
 import com.clinicaguadalupe.entity.Usuario;
 import com.clinicaguadalupe.exception.DatoDuplicadoException;
+import com.clinicaguadalupe.entity.Paciente;
 import com.clinicaguadalupe.repository.UsuarioRepository;
 import com.clinicaguadalupe.service.UsuarioService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,6 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public UsuarioResponse registrar(UsuarioRequest request) {
 
         if (usuarioRepository.existsByEmail(request.email())) {
@@ -68,7 +70,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setRol(request.rol());
         usuario.setActivo(true);
 
-        return convertirRespuesta(usuarioRepository.save(usuario));
+        Usuario guardado = usuarioRepository.save(usuario);
+        if (guardado.getRol() == Rol.PACIENTE) {
+            Paciente paciente = new Paciente();
+            paciente.setUsuario(guardado);
+            pacienteRepository.save(paciente);
+        }
+        return convertirRespuesta(guardado);
     }
 
     @Override

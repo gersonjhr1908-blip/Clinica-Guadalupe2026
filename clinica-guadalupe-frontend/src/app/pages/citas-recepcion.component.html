@@ -1,0 +1,47 @@
+<h1>{{ titulos[vista()] }}</h1>
+<div class="filtros">
+  @if (vista() === 'agenda') {
+    <time [attr.datetime]="fecha()">{{ fecha() | date:'dd/MM/yyyy' }}</time>
+  }
+  @if (vista() === 'citas') {
+    <app-downward-select label="Estado" [options]="estados" [value]="estado()"
+                         (valueChange)="estado.set($event); paginas.page = 1" />
+  }
+  <button type="button" [disabled]="cargando() || confirmando() !== null" (click)="cargar()">Actualizar</button>
+</div>
+@if (cargando()) {
+  <p role="status">Cargando citas…</p>
+} @else if (errorCarga()) {
+  <p class="error" role="alert">{{ errorCarga() }}</p>
+} @else if (!visibles().length) {
+  <p role="status">{{ vista() === 'pacientes' ? 'No hay citas pendientes de confirmar.' : vista() === 'agenda' ? 'No hay citas confirmadas para hoy.' : 'No hay citas para mostrar.' }}</p>
+} @else {
+  <div class="tabla">
+    <table>
+      <thead>
+        <tr><th scope="col">Cita</th><th scope="col">Paciente</th><th scope="col">Médico</th><th scope="col">Fecha y hora</th><th scope="col">Estado</th>@if (vista() === 'pacientes') { <th scope="col">Acción</th> }</tr>
+      </thead>
+      <tbody>
+        @for (cita of paginas.slice(visibles()); track cita.id) {
+          <tr>
+            <td>{{ cita.codigo }}</td>
+            <td>{{ cita.paciente }}</td>
+            <td>{{ cita.medico }}<small>{{ cita.especialidad }} · {{ cita.consultorio }}</small></td>
+            <td><time [attr.datetime]="cita.fechaHoraInicio">{{ cita.fechaHoraInicio | date:'dd/MM/yyyy HH:mm' }}</time></td>
+            <td>{{ cita.estado === 'NO_ASISTIO' ? 'No se presentó' : cita.estado }}</td>
+            @if (vista() === 'pacientes') {
+              <td>
+                <button class="confirmar" type="button" [disabled]="confirmando() !== null"
+                        [attr.aria-label]="'Confirmar cita ' + cita.codigo" (click)="confirmar(cita)">
+                  {{ confirmando() === cita.id ? 'Confirmando…' : 'Confirmar' }}
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <app-pagination [page]="paginas.current(visibles().length)" [pages]="paginas.count(visibles().length)"
+                  (pageChange)="paginas.page = $event" />
+}

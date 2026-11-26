@@ -9,7 +9,7 @@ import com.clinicaguadalupe.exception.RecursoNoEncontradoException;
 import com.clinicaguadalupe.repository.CitaRepository;
 import com.clinicaguadalupe.repository.HorarioMedicoRepository;
 import com.clinicaguadalupe.repository.MedicoRepository;
-import com.clinicaguadalupe.repository.PacienteRepository;
+import com.clinicaguadalupe.service.PacienteService;
 import com.clinicaguadalupe.service.CitaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,18 +23,18 @@ import java.util.List;
 public class CitaServiceImpl implements CitaService {
 
     private final CitaRepository citaRepository;
-    private final PacienteRepository pacienteRepository;
+    private final PacienteService pacienteService;
     private final MedicoRepository medicoRepository;
     private final HorarioMedicoRepository horarioRepository;
 
     public CitaServiceImpl(
             CitaRepository citaRepository,
-            PacienteRepository pacienteRepository,
+            PacienteService pacienteService,
             MedicoRepository medicoRepository,
             HorarioMedicoRepository horarioRepository
     ) {
         this.citaRepository = citaRepository;
-        this.pacienteRepository = pacienteRepository;
+        this.pacienteService = pacienteService;
         this.medicoRepository = medicoRepository;
         this.horarioRepository = horarioRepository;
     }
@@ -45,7 +45,7 @@ public class CitaServiceImpl implements CitaService {
             String emailPaciente,
             CitaRequest request
     ) {
-        Paciente paciente = obtenerPaciente(emailPaciente);
+        Paciente paciente = pacienteService.obtenerOCrearPorEmail(emailPaciente);
         Medico medico = obtenerMedico(request.medicoId());
 
         LocalDateTime inicio = LocalDateTime.of(
@@ -123,8 +123,6 @@ public class CitaServiceImpl implements CitaService {
     public List<CitaResponse> listarMisCitas(
             String emailPaciente
     ) {
-        obtenerPaciente(emailPaciente);
-
         return citaRepository
                 .findByPacienteUsuarioEmailOrderByFechaHoraInicioDesc(
                         emailPaciente
@@ -245,16 +243,6 @@ public class CitaServiceImpl implements CitaService {
                     "El consultorio está ocupado en ese horario"
             );
         }
-    }
-
-    private Paciente obtenerPaciente(String email) {
-        return pacienteRepository
-                .findByUsuarioEmail(email)
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Perfil de paciente no encontrado"
-                        )
-                );
     }
 
     private Medico obtenerMedico(Long id) {

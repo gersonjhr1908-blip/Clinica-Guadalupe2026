@@ -65,6 +65,12 @@ public class ConsultorioController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        consultorioService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ConsultorioResponse> cambiarEstado(
             @PathVariable Long id,

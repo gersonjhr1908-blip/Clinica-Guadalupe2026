@@ -49,10 +49,15 @@ interface Medico {
   activo: boolean;
 }
 
+import { Pagination, PaginationComponent } from '../pagination';
+
+import { ConsultoriosComponent } from './consultorios.component';
+import { CitasRecepcionComponent } from '../citas-recepcion.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent, CitasRecepcionComponent, ConsultoriosComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrls: [
     './dashboard.component.css',
@@ -72,6 +77,9 @@ export class DashboardComponent {
   private readonly http = inject(HttpClient);
   summary: DashboardSummary | null = null;
   activeSection = 'inicio';
+  readonly userPages = new Pagination();
+  readonly doctorPages = new Pagination();
+  readonly specialtyPages = new Pagination();
   especialidades: Especialidad[] = [];
   usuarios: Usuario[] = [];
   medicos: Medico[] = [];
@@ -117,6 +125,7 @@ export class DashboardComponent {
   }
   open(section: string): void {
     this.activeSection = section;
+    this.userPages.page = this.doctorPages.page = this.specialtyPages.page = 1;
     if (section === 'especialidades') this.loadEspecialidades();
     if (['usuarios', 'recepcionistas', 'pacientes'].includes(section)) this.loadUsuarios();
     if (section === 'medicos') {
@@ -460,7 +469,8 @@ export class DashboardComponent {
   }
   get filteredUsuarios(): Usuario[] {
     const query = this.normalize(this.userSearch);
-    const selectedRole = this.normalize(this.userRoleFilter);
+    const selectedRole = this.activeSection === 'pacientes' ? 'PACIENTE'
+      : this.activeSection === 'recepcionistas' ? 'RECEPCIONISTA' : this.normalize(this.userRoleFilter);
     return this.usuarios.filter((item) => {
       const itemRole = this.normalize(String(item.rol));
       const fullText = this.normalize(`${item.nombres} ${item.apellidos} ${item.email}`);
@@ -488,6 +498,6 @@ export class DashboardComponent {
       .toUpperCase();
   }
   onRoleFilterChange(): void {
-    this.usuarios = [...this.usuarios];
+    this.userPages.page = 1;
   }
 }

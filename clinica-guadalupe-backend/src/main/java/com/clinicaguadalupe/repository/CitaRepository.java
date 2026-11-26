@@ -77,6 +77,8 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
             String email
     );
 
+    boolean existsByConsultorioId(Long consultorioId);
+
     boolean existsByPacienteUsuarioId(Long usuarioId);
 
     boolean existsByMedicoUsuarioId(Long usuarioId);

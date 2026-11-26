@@ -1,0 +1,68 @@
+<section class="module">
+  <div class="module-header">
+    <h1>Consultorios</h1>
+    <button type="button" class="primary-action" (click)="abrir()"
+            [disabled]="cargando() || ocupado() || !!errorCarga()">＋ Agregar consultorio</button>
+  </div>
+
+  @if (formularioAbierto) {
+    <form class="form-card top-form" #form="ngForm" (ngSubmit)="guardar()">
+      <h2>{{ editandoId === null ? 'Nuevo consultorio' : 'Editar consultorio' }}</h2>
+      <div class="form-grid">
+        <label>Código
+          <input name="codigo" [(ngModel)]="datos.codigo" maxlength="20" required [disabled]="ocupado()" />
+        </label>
+        <label>Nombre
+          <input name="nombre" [(ngModel)]="datos.nombre" maxlength="100" required [disabled]="ocupado()" />
+        </label>
+        <label>Piso
+          <input type="number" name="piso" [(ngModel)]="datos.piso" min="1" max="20" step="1" required [disabled]="ocupado()" />
+        </label>
+      </div>
+      <label>Descripción (opcional)
+        <textarea name="descripcion" [(ngModel)]="datos.descripcion" maxlength="255" rows="3" [disabled]="ocupado()"></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="primary-action"
+                [disabled]="form.invalid || !datos.codigo.trim() || !datos.nombre.trim() || ocupado()">Guardar consultorio</button>
+        <button type="button" class="secondary" [disabled]="ocupado()" (click)="formularioAbierto = false">Cancelar</button>
+      </div>
+    </form>
+  }
+
+  @if (cargando()) {
+    <p role="status">Cargando consultorios…</p>
+  } @else if (errorCarga()) {
+    <p role="alert" class="error">{{ errorCarga() }}</p>
+    <button type="button" class="secondary" (click)="cargar()">Reintentar</button>
+  } @else {
+    <div class="table-card">
+      <table>
+        <thead><tr><th scope="col">Código</th><th scope="col">Nombre</th><th scope="col">Piso</th><th scope="col">Descripción</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+        <tbody>
+          @for (consultorio of paginas.slice(filas()); track consultorio.id) {
+            <tr>
+              <td>{{ consultorio.codigo }}</td><td>{{ consultorio.nombre }}</td><td>{{ consultorio.piso }}</td>
+              <td class="descripcion">{{ consultorio.descripcion || '—' }}</td>
+              <td><span class="status" [class.inactive-status]="!consultorio.activo">{{ consultorio.activo ? 'Activo' : 'Inactivo' }}</span></td>
+              <td class="actions">
+                <button type="button" class="status-toggle" [class.is-inactive]="!consultorio.activo"
+                        [disabled]="ocupado()" [title]="consultorio.activo ? 'Desactivar consultorio' : 'Activar consultorio'"
+                        [attr.aria-label]="(consultorio.activo ? 'Desactivar ' : 'Activar ') + consultorio.codigo"
+                        (click)="cambiarEstado(consultorio)"></button>
+                <button type="button" class="edit-action" title="Editar" [disabled]="ocupado()"
+                        [attr.aria-label]="'Editar ' + consultorio.codigo" (click)="abrir(consultorio)">✎</button>
+                <button type="button" class="danger-delete" title="Eliminar" [disabled]="ocupado()"
+                        [attr.aria-label]="'Eliminar ' + consultorio.codigo" (click)="eliminar(consultorio)">🗑</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6">Todavía no hay consultorios registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [page]="paginas.current(filas().length)" [pages]="paginas.count(filas().length)"
+                    (pageChange)="paginas.page = $event" />
+  }
+</section>

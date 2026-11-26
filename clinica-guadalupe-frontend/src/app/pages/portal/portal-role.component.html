@@ -1,1 +1,146 @@
-<section class="portal-layout"><aside class="portal-sidebar"><div class="portal-user"><span>{{ name.charAt(0) }}</span><div><strong>{{ name }}</strong><small>{{ patient ? 'Paciente' : 'Recepcionista' }}</small></div></div><nav><p>{{ patient ? 'MI CUENTA' : 'MENÚ RECEPCIÓN' }}</p><button [class.active]="section==='inicio'" (click)="setSection('inicio')">⌂ <span>Inicio</span></button>@if(patient){<button [class.active]="section==='agendar'" (click)="setSection('agendar')">＋ <span>Agendar cita</span></button><button [class.active]="section==='mis-citas'" (click)="setSection('mis-citas')">◫ <span>Mis citas</span></button><button [class.active]="section==='historial'" (click)="setSection('historial')">▤ <span>Historial de citas</span></button>} @else {<button [class.active]="section==='pacientes'" (click)="setSection('pacientes')">♙ <span>Pacientes con cita</span></button><button [class.active]="section==='agenda'" (click)="setSection('agenda')">◫ <span>Agenda del día</span></button><button [class.active]="section==='citas'" (click)="setSection('citas')">▤ <span>Gestión de citas</span></button>}<button (click)="openProfile.emit()">⚙ <span>Mi perfil</span></button></nav><button class="portal-logout" (click)="logout.emit()">↪ Cerrar sesión</button></aside><main class="portal-main"><p class="eyebrow">{{ patient ? 'ÁREA DEL PACIENTE' : 'PANEL RECEPCIONISTA' }}</p>@if(section==='inicio'){<h1>Hola, {{ name }}</h1><p class="muted">Gestiona tus actividades de Clínica Guadalupe.</p>}@if(section==='agendar'){<h1>Agendar cita</h1><p class="muted">Selecciona especialidad, médico, sede, fecha, hora y método de pago.</p>}@if(section==='mis-citas' || section==='historial' || section==='pacientes' || section==='agenda' || section==='citas'){<h1>Registros</h1><div class="empty-panel">No hay información para mostrar todavía.</div>}</main></section>
+<section class="portal-layout">
+  <aside class="portal-sidebar">
+    <div class="portal-user">
+      <span>{{ name.charAt(0) }}</span>
+      <div><strong>{{ name }}</strong><small>{{ patient ? 'Paciente' : 'Recepcionista' }}</small></div>
+    </div>
+    <nav aria-label="Menú del portal">
+      <p>{{ patient ? 'MI CUENTA' : 'MENÚ RECEPCIÓN' }}</p>
+      <button [class.active]="section === 'inicio'" (click)="setSection('inicio')">⌂ <span>Inicio</span></button>
+      @if (patient) {
+        <button [class.active]="section === 'agendar'" (click)="setSection('agendar')">＋ <span>Agendar cita</span></button>
+        <button [class.active]="section === 'mis-citas'" (click)="setSection('mis-citas')">◫ <span>Mis citas</span></button>
+        <button [class.active]="section === 'historial'" (click)="setSection('historial')">▤ <span>Historial de citas</span></button>
+      } @else {
+        <button [class.active]="section === 'pacientes'" (click)="setSection('pacientes')">♙ <span>Pacientes con cita</span></button>
+        <button [class.active]="section === 'agenda'" (click)="setSection('agenda')">◫ <span>Agenda del día</span></button>
+        <button [class.active]="section === 'citas'" (click)="setSection('citas')">▤ <span>Gestión de citas</span></button>
+      }
+      <button (click)="openProfile.emit()">⚙ <span>Mi perfil</span></button>
+    </nav>
+    <button class="portal-logout" (click)="logout.emit()">↪ Cerrar sesión</button>
+  </aside>
+
+  <main class="portal-main">
+    <p class="eyebrow">{{ patient ? 'ÁREA DEL PACIENTE' : 'PANEL RECEPCIONISTA' }}</p>
+    @if (section === 'inicio') {
+      <h1>Hola, {{ name }}</h1>
+      <p class="muted">Gestiona tus actividades de Clínica Guadalupe.</p>
+    }
+
+    @if (patient && section === 'agendar') {
+      <h1>Agendar cita</h1>
+      <form class="portal-form-card" #formulario="ngForm" (ngSubmit)="reservar()">
+        @if (cargandoCatalogo()) {
+          <p class="portal-full" role="status">Cargando especialidades y médicos…</p>
+        } @else if (errorCatalogo()) {
+          <p class="portal-full" role="alert">{{ errorCatalogo() }}</p>
+          <button type="button" class="portal-button" (click)="cargarCatalogo()">Reintentar</button>
+        } @else if (!especialidades().length) {
+          <p class="portal-full" role="status">No hay especialidades disponibles.</p>
+        }
+
+        <div class="especialidad-campo"
+             (focusout)="cerrarEspecialidadesAlSalir($event)"
+             (keydown.escape)="especialidadesAbiertas.set(false); selectorEspecialidad.focus()">
+          <span id="etiqueta-especialidad">Especialidad</span>
+          <button #selectorEspecialidad type="button" class="especialidad-selector"
+                  aria-labelledby="etiqueta-especialidad valor-especialidad"
+                  aria-controls="opciones-especialidad" [attr.aria-expanded]="especialidadesAbiertas()"
+                  [disabled]="guardando() || !especialidades().length"
+                  (click)="especialidadesAbiertas.set(!especialidadesAbiertas())">
+            <span id="valor-especialidad">{{ especialidadSeleccionada() }}</span>
+            <span aria-hidden="true">▾</span>
+          </button>
+          <ul id="opciones-especialidad" class="especialidad-opciones" [hidden]="!especialidadesAbiertas()">
+            @for (especialidad of especialidades(); track especialidad.id) {
+              <li>
+                <button type="button" [attr.aria-pressed]="reserva.especialidadId === especialidad.id"
+                        (click)="seleccionarEspecialidad(especialidad.id); selectorEspecialidad.focus()">
+                  {{ especialidad.nombre }}
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <label>
+          Médico
+          <select name="medico" [(ngModel)]="reserva.medicoId" (ngModelChange)="cargarHorarios()"
+                  [disabled]="guardando() || !medicosFiltrados().length" required>
+            <option [ngValue]="null">Selecciona un médico</option>
+            @for (medico of medicosFiltrados(); track medico.id) {
+              <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>
+            }
+          </select>
+        </label>
+        @if (reserva.especialidadId && !medicosFiltrados().length) {
+          <p class="portal-full" role="status">No hay médicos disponibles para esta especialidad.</p>
+        }
+
+        <label>
+          Fecha
+          <input type="date" name="fecha" [(ngModel)]="reserva.fecha" (ngModelChange)="cargarHorarios()"
+                 [disabled]="guardando()" required />
+        </label>
+
+        <app-downward-select label="Hora y consultorio" placeholder="Selecciona un horario"
+                             [options]="opcionesHorario()" [(value)]="reserva.hora"
+                             [disabled]="guardando() || !horarios().length" />
+
+        @if (cargandoHorarios()) {
+          <p class="portal-full" role="status">Consultando horarios…</p>
+        } @else if (errorHorarios()) {
+          <p class="portal-full" role="alert">{{ errorHorarios() }}</p>
+          <button type="button" class="portal-button" (click)="cargarHorarios()">Reintentar horarios</button>
+        } @else if (reserva.medicoId && reserva.fecha && !horarios().length) {
+          <p class="portal-full" role="status">No hay horarios disponibles para ese día.</p>
+        }
+
+        <label class="full">
+          Motivo de consulta
+          <textarea name="motivo" [(ngModel)]="reserva.motivo" rows="3" maxlength="500"
+                    [disabled]="guardando()" required></textarea>
+        </label>
+        @if (errorReserva()) {
+          <p class="portal-full" role="alert">{{ errorReserva() }}</p>
+        }
+        <button type="submit" class="portal-button"
+                [disabled]="!formulario.valid || !reserva.hora || !reserva.motivo.trim() || guardando()">
+          {{ guardando() ? 'Agendando…' : 'Agendar cita' }}
+        </button>
+      </form>
+    }
+
+    @if (patient && (section === 'mis-citas' || section === 'historial')) {
+      <h1>{{ section === 'mis-citas' ? 'Mis citas' : 'Historial de citas' }}</h1>
+      @if (section === 'mis-citas' && codigoReservado()) {
+        <p role="status">Cita registrada. Tu código es <strong>{{ codigoReservado() }}</strong>.</p>
+      }
+      <div class="empty-panel">
+        @if (cargandoCitas()) {
+          <p role="status">Cargando citas…</p>
+        } @else if (errorCitas()) {
+          <p role="alert">{{ errorCitas() }}</p>
+          <button type="button" class="portal-button" (click)="cargarCitas()">Reintentar</button>
+        } @else {
+          @for (cita of appointmentPages.slice(citasVisibles()); track cita.id) {
+            <div class="cita-row">
+              <strong>{{ cita.codigo }}</strong>
+              <span>{{ cita.medico }} · {{ cita.especialidad }} · {{ cita.consultorio }}</span>
+              <time [attr.datetime]="cita.fechaHoraInicio">{{ cita.fechaHoraInicio | date:'dd/MM/yyyy HH:mm' }}</time>
+              <b>{{ cita.estado.replace('_', ' ') }}</b>
+            </div>
+          } @empty {
+            <p>{{ section === 'mis-citas' ? 'No tienes citas próximas.' : 'Todavía no tienes citas en el historial.' }}</p>
+          }
+          <app-pagination [page]="appointmentPages.current(citasVisibles().length)" [pages]="appointmentPages.count(citasVisibles().length)" (pageChange)="appointmentPages.page = $event" />
+        }
+      </div>
+    }
+
+    @if (!patient && (section === 'pacientes' || section === 'agenda' || section === 'citas')) {
+      <app-citas-recepcion [vista]="section" />
+    }
+  </main>
+</section>

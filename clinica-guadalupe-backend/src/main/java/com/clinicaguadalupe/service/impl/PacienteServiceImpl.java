@@ -55,13 +55,28 @@ public class PacienteServiceImpl implements PacienteService {
         return convertirRespuesta(actualizado);
     }
 
+    @Override
+    @Transactional
+    public Paciente obtenerOCrearPorEmail(String email) {
+        Usuario usuario = usuarioRepository.bloquearPorEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "El usuario del token ya no existe"
+                ));
+
+        return obtenerOCrearPerfil(usuario);
+    }
+
     private Paciente buscarMiPerfil(Long usuarioId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
+        Usuario usuario = usuarioRepository.bloquearPorId(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED,
                         "El usuario del token ya no existe"
                 ));
 
+        return obtenerOCrearPerfil(usuario);
+    }
+
+    private Paciente obtenerOCrearPerfil(Usuario usuario) {
         if (!Boolean.TRUE.equals(usuario.getActivo())
                 || usuario.getRol() != Rol.PACIENTE) {
             throw new ResponseStatusException(
@@ -70,7 +85,7 @@ public class PacienteServiceImpl implements PacienteService {
             );
         }
 
-        return pacienteRepository.findByUsuarioId(usuarioId).orElseGet(() -> {
+        return pacienteRepository.bloquearPorUsuarioId(usuario.getId()).orElseGet(() -> {
             Paciente nuevo = new Paciente();
             nuevo.setUsuario(usuario);
             return pacienteRepository.save(nuevo);
